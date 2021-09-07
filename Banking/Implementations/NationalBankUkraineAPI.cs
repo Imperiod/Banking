@@ -266,8 +266,8 @@ namespace Banking.Implementations
             }
 
             WriteTransaction(DateTime.Now,
-                $"{_authorizedUser} converted from {from.SerialNumber} {amountFrom} {from.Currency.ShortName}" +
-                $" to {to.SerialNumber} {Math.Round(endMoneyValue, 2)} {to.Currency.ShortName}");
+                $"{_authorizedUser} converted {amountFrom} {from.Currency.ShortName} from {from.SerialNumber} " +
+                $"in {Math.Round(endMoneyValue, 2)} {to.Currency.ShortName} to {to.SerialNumber}");
         }
 
 
@@ -383,7 +383,7 @@ namespace Banking.Implementations
 
             WriteTransaction(DateTime.Now,
                 $"{from.Nominal.Value} {from.Currency.Name} was exchange" +
-                $" to {to.Name} {Math.Round(money.Sum(s => s.Nominal.Value), 2)}");
+                $" in {to.Name} {Math.Round(money.Sum(s => s.Nominal.Value), 2)}");
 
             return money;
         }
@@ -734,9 +734,7 @@ namespace Banking.Implementations
                 _balance.AddRange(castMoney);
             }
 
-            WriteTransaction(DateTime.Now,
-                $"Someone put {sum} {account.Currency.ShortName}" +
-                $" to account of {account}");
+            WriteTransaction(DateTime.Now, $"Someone put {sum} {account.Currency.ShortName} to {account}");
         }
 
         /// <summary>

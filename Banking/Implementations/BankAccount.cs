@@ -52,7 +52,7 @@ namespace Banking.Implementations
 
         public override string ToString()
         {
-            return $"Account of {User} {SerialNumber} have {Amount} {Currency.ShortName}";
+            return $"Account of {User} {SerialNumber}, which has {Amount} {Currency.ShortName}";
         }
 
         public override bool Equals(object obj)
