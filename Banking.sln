@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31424.327
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Banking", "Banking\Banking.csproj", "{275F2C5B-CECA-4BCE-A01D-9DAD35C64345}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBanking", "TestProject1\TestBanking.csproj", "{4312F1E3-C7CA-4738-91B9-EA44AE782C94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBanking", "TestBanking\TestBanking.csproj", "{4312F1E3-C7CA-4738-91B9-EA44AE782C94}"
 	ProjectSection(ProjectDependencies) = postProject
 		{275F2C5B-CECA-4BCE-A01D-9DAD35C64345} = {275F2C5B-CECA-4BCE-A01D-9DAD35C64345}
 	EndProjectSection
