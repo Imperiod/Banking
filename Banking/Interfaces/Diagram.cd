@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Interface Name="Banking.Interfaces.IBankSerialNumber&lt;TBankCode, TSeriesCode, TSeriesNumber&gt;">
+    <Position X="1" Y="10" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAEgAAAAAAABAAACAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Basic\IBankSerialNumber.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Banking.Interfaces.ICurrency">
+    <Position X="1" Y="2.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Basic\ICurrency.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IExchangeCashCurrency">
+    <Position X="14.5" Y="0.5" Width="6.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>Interfaces\Basic\IExchangeCashCurrency.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IMoney&lt;TBankCode, TSeriesCode, TSeriesNumber&gt;">
+    <Position X="0.75" Y="7.25" Width="3" />
+    <AssociationLine Name="Currency" Type="Banking.Interfaces.ICurrency" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="0.75" Y="7.25" />
+        <Point X="0.75" Y="3.125" />
+        <Point X="1" Y="3.125" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAEAAAAAAQACAEAAgAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Decorators\1\IMoney.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="SerialNumber" />
+      <Property Name="Currency" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IUser">
+    <Position X="1" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEgAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Interfaces\Basic\IUser.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Banking.Interfaces.ITransaction">
+    <Position X="1.25" Y="13" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAAAAAAAAAAAAAAAAAABAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Basic\ITransaction.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IExchangeDigitalCurrency">
+    <Position X="14.5" Y="2.25" Width="6.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Basic\IExchangeDigitalCurrency.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IBankAccount&lt;TBankCode, TSeriesCode, TSeriesNumber&gt;">
+    <Position X="7" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAAAAAAAACACAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Decorators\1\IBankAccount.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="SerialNumber" />
+      <Property Name="User" />
+      <Property Name="Currency" />
+      <Property Name="Amount" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IBankTransaction">
+    <Position X="4.5" Y="13" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Extensions\1\IBankTransaction.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="User" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IBankCurrency">
+    <Position X="3.5" Y="2.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAgAAAAAAAAAAAAIABAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Extensions\2\IBankCurrency.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Banking.Interfaces.ICurrencyRate">
+    <Position X="4" Y="1.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAEgAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Decorators\1\ICurrencyRate.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Rate" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IBankTransactionsCollection">
+    <Position X="7.5" Y="13" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>Interfaces\Decorators\1\IBankTransactionsCollection.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Banking.Interfaces.INationalBank&lt;TBankCode, TSeriesCode, TSeriesNumber&gt;">
+    <Position X="9" Y="6.75" Width="6.5" />
+    <InheritanceLine Type="Banking.Interfaces.IExchangeDigitalCurrency" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="14.938" Y="3.353" />
+        <Point X="14.938" Y="6.75" />
+      </Path>
+    </InheritanceLine>
+    <InheritanceLine Type="Banking.Interfaces.IExchangeCashCurrency" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="20.75" Y="1.125" />
+        <Point X="21.125" Y="1.125" />
+        <Point X="21.125" Y="7.874" />
+        <Point X="15.5" Y="7.874" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>BgDBBAAAAQAAAAAABAgQEAAAAAAAAAAAAAAAAAAABKA=</HashCode>
+      <FileName>Interfaces\Extensions\3\INationalBank.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Transactions" />
+      <Property Name="Currencies" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IBankCurrencyCollection">
+    <Position X="8.5" Y="3" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>Interfaces\Decorators\1\IBankCurrencyCollection.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Banking.Interfaces.IBankUser">
+    <Position X="4" Y="5.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\Extensions\1\IBankUser.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
