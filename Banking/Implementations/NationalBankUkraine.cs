@@ -81,16 +81,14 @@ namespace Banking.Implementations
 
         private async Task<JsonDocument> GetJsonDocumentAsync(Uri uri)
         {
-            return await GetResponseAsync(uri)
-            .ContinueWith(new Func<Task<byte[]>, JsonDocument>(t =>
+            try
             {
-                if (t.IsFaulted)
-                {
-                    throw t.Exception;
-                }
-
-                return JsonDocument.Parse(t.Result);
-            }));
+                return await GetResponseAsync(uri).ContinueWith(t => { return JsonDocument.Parse(t.Result); });
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         private IBankCurrency ParseCurrency(JsonElement item)

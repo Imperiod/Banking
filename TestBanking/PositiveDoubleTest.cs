@@ -23,12 +23,6 @@ namespace TestBanking
         }
 
         [Fact]
-        public void Value_NegativeValue_ArgumentOutOfRangeException()
-        {
-            Assert.Throws<ArgumentOutOfRangeException>(() => positiveDouble.Value = -0.00000000001);
-        }
-
-        [Fact]
         public void Equals_Null_ArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => positiveDouble.Equals(null));

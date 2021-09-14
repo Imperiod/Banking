@@ -9,23 +9,8 @@ namespace Banking.Implementations
 {
     public class PositiveDouble
     {
-        private double _value;
 
-        public double Value
-        {
-            get
-            {
-                return _value;
-            }
-            set
-            {
-                if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Negative value");
-                }
-                _value = value;
-            }
-        }
+        public double Value { get; init; }
 
         public PositiveDouble(double value)
         {

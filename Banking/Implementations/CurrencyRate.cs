@@ -18,9 +18,7 @@ namespace Banking.Implementations
                 throw new ArgumentNullException(nameof(rate));
             }
 
-            rate.Value = Math.Round(rate.Value, 4, MidpointRounding.ToZero);
-
-            Rate = rate;
+            Rate = new PositiveDouble(Math.Round(rate.Value, 4, MidpointRounding.ToZero));
         }
 
         public override string ToString()

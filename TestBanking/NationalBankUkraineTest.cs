@@ -314,8 +314,9 @@ namespace TestBanking
             var postAmount = preAmount + money.Sum(s => s.Nominal.Value);
 
             fixture.Bank.PutCashAsync<string, ulong, ulong>(account, money).Wait();
+            fixture.Accounts = fixture.Bank.GetAccountsAsync().Result;
 
-            Assert.Equal(postAmount, fixture.Accounts.First(f => f.Equals(account)).Amount.Value);
+            Assert.Equal(postAmount, fixture.Accounts.First(f => f.SerialNumber.Equals(account.SerialNumber)).Amount.Value);
         }
         #endregion
 
@@ -414,7 +415,7 @@ namespace TestBanking
 
         public List<IBankCurrency> Currencies { get; private set; }
 
-        public List<IBankAccount<string, ulong, ulong>> Accounts { get; private set; }
+        public List<IBankAccount<string, ulong, ulong>> Accounts { get; set; }
 
         public Dictionary<ICurrency, List<IMoney<string, ulong, ulong>>> AvailableMoney { get; private set; }
 

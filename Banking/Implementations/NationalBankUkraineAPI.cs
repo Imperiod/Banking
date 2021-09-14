@@ -714,13 +714,13 @@ namespace Banking.Implementations
             {
                 var index = _accounts.IndexOf(_accounts.First(f => f.SerialNumber.Equals(account.SerialNumber)));
                 var preAccount = _accounts[index];
-                preAccount.Amount.Value += sum;
+                var newAmount = new PositiveDouble(preAccount.Amount.Value + sum);
 
                 _accounts[index] = new BankAccount<string, ulong, ulong>(
                     preAccount.SerialNumber,
                     preAccount.User,
                     preAccount.Currency,
-                    preAccount.Amount);
+                    newAmount);
             }
 
             var castMoney = money.Select(s => 
