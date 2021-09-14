@@ -355,7 +355,6 @@ namespace NationalBankClient
             Console.WriteLine(msg);
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Beep();
         }
     }
 }
