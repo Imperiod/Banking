@@ -150,7 +150,7 @@ namespace NationalBankClient
                     return;
                 }
 
-                PrintSucceedMsg("Account was register");
+                PrintInfo(new List<string>() { "Account was register" });
             }
         }
 
@@ -211,7 +211,7 @@ namespace NationalBankClient
                         try
                         {
                             await _bank.PutCashAsync(account, list);
-                            PrintSucceedMsg("Put was succeed");
+                            PrintInfo(new List<string>() { "Put was succeed" });
                             return;
                         }
                         catch (Exception ex)
@@ -297,7 +297,7 @@ namespace NationalBankClient
                     try
                     {
                         await _bank.ExchangeDigitalCurrencyAsync(first, second, value);
-                        PrintSucceedMsg("Exchange was succeed");
+                        PrintInfo(new List<string>() { "Exchange was succeed" });
                     }
                     catch (Exception ex)
                     {
@@ -320,12 +320,7 @@ namespace NationalBankClient
                 Console.WriteLine(ex.Message);
                 return;
             }
-
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            accounts.ForEach(f => Console.WriteLine(f));
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine();
+            PrintInfo(accounts.Select(s => s.ToString()).ToList(), ConsoleColor.Cyan);
         }
 
         async Task PrintTransactions()
@@ -341,18 +336,17 @@ namespace NationalBankClient
                 return;
             }
 
-            Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            transactions.ForEach(f => Console.WriteLine(f));
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine();
+            PrintInfo(transactions.Select(s => s.ToString()).ToList(), ConsoleColor.Magenta);
         }
 
-        void PrintSucceedMsg(string msg)
+        void PrintInfo(List<string> msg, ConsoleColor color = default)
         {
             Console.Clear();
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(msg);
+            Console.ForegroundColor = color == default ? ConsoleColor.Green : color;
+            foreach (var item in msg)
+            {
+                Console.WriteLine(item);
+            }
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.White;
         }
