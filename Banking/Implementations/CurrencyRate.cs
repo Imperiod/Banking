@@ -34,7 +34,14 @@ namespace Banking.Implementations
             }
             else
             {
-                return Rate.Equals(rate.Rate);
+                if (GetHashCode().Equals(rate.GetHashCode()))
+                {
+                    return true;
+                }
+                else
+                {
+                    return Rate.Equals(rate.Rate);
+                }
             }
         }
 
