@@ -44,11 +44,20 @@ namespace Banking.Implementations
             {
                 throw new ArgumentNullException(nameof(currency));
             }
-
-            return Date == currency.Date &&
-                   Currency.Equals(currency.Currency) &&
-                   ShortName == currency.ShortName &&
-                   CurrencyRate.Equals(currency.CurrencyRate);
+            else
+            {
+                if (GetHashCode().Equals(currency.GetHashCode()))
+                {
+                    return true;
+                }
+                else
+                {
+                    return Date == currency.Date &&
+                        Currency.Equals(currency.Currency) &&
+                        ShortName == currency.ShortName &&
+                        CurrencyRate.Equals(currency.CurrencyRate);
+                }
+            }
         }
 
         public override bool Equals(object obj)
