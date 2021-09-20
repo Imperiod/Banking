@@ -82,13 +82,13 @@ namespace Banking.Implementations
             {
                 throw new ArgumentNullException(nameof(serialNumber));
             }
-            if (GetHashCode() == serialNumber.GetHashCode())
+            if (GetHashCode().Equals(serialNumber.GetHashCode()))
             {
                 return true;
             }
             else
             {
-                return ToString() == serialNumber.ToString();
+                return ToString().Equals(serialNumber.ToString());
             }
         }
 
