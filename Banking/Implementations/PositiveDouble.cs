@@ -32,13 +32,13 @@ namespace Banking.Implementations
             {
                 throw new ArgumentNullException(nameof(value));
             }
-            if (GetHashCode() == value.GetHashCode())
+            if (GetHashCode().Equals(value.GetHashCode()))
             {
                 return true;
             }
             else
             {
-                return Value == value.Value;
+                return Value.Equals(value.Value);
             }
         }
 
