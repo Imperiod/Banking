@@ -11,7 +11,7 @@ namespace TestBanking
         public void Constructor_NullArgument_ArgumentNullException()
         {
             var serialNumber = new BankSerialNumber<string, ulong, ulong>("NBU", 1, 1);
-            IBankUser user = new BankUser("Test", "Test");
+            IBankUser user = new BankUser("Test", "PasswordTest");
             ICurrency currencyBase = new Currency("Test");
             PositiveDouble rate = new PositiveDouble(1);
             ICurrencyRate currencyRate = new CurrencyRate(rate);

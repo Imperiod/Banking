@@ -43,7 +43,8 @@ namespace TestBanking
         {
             fixture.Bank.AuthorizeAsync(new BankUser("TEST1", "TEST1")).Wait();
             Assert.Equal(new BankUser("TEST1", "TEST1"), fixture.Bank.GetAuthorizedUser().Result);
-            var task = fixture.Bank.AuthorizeAsync(new BankUser("TEST", "TEST"));
+
+            var task = fixture.Bank.AuthorizeAsync(new BankUser("TEST", "PasswordTest"));
             task.Wait();
             Assert.True(task.IsCompletedSuccessfully);
         }
@@ -119,6 +120,7 @@ namespace TestBanking
                 new PositiveDouble(howMuchConvert));
 
             taskConvert.Wait();
+            fixture.Accounts = fixture.Bank.GetAccountsAsync().Result;
 
             Assert.True(taskConvert.IsCompletedSuccessfully);
         }
@@ -424,7 +426,7 @@ namespace TestBanking
             AvailableMoney = new Dictionary<ICurrency, List<IMoney<string, ulong, ulong>>>();
             Bank = new NationalBankUkraine();
             var loadTask = Bank.LoadCurrenciesAsync();
-            var regUserTask = Bank.RegisterUserAsync(new BankUser("TEST", "TEST"));
+            var regUserTask = Bank.RegisterUserAsync(new BankUser("TEST", "PasswordTest"));
 
             Task.WaitAll(loadTask, regUserTask);
 

@@ -27,9 +27,10 @@ namespace Banking.Implementations
                 _password = value;
             }
         }
+
         public string Login { get; init; }
     
-        public BankUser(string login, string password, List<IUserPasswordRule<string>> rules)
+        public BankUser(string login, string password)
         {
             if (string.IsNullOrWhiteSpace(login))
             {
@@ -39,14 +40,12 @@ namespace Banking.Implementations
             {
                 throw new ArgumentException("String was null or white space");
             }
-            if (rules is null)
-            {
-                throw new ArgumentNullException(nameof(rules));
-            }
+
+            _rules = new List<IUserPasswordRule<string>>();
+            _rules.Add(new BankUserPasswordLengthRule());
 
             Login = login;
             Password = password;
-            _rules = rules;
         }
 
         public override string ToString()

@@ -33,7 +33,7 @@ namespace Banking.Implementations
         private IBankSerialNumber<string, ulong, ulong> _lastSerialNumber;
 
         private List<IBankCurrency> _currencies;
-        
+
         private List<IBankAccount<string, ulong, ulong>> _accounts;
 
         private List<IMoney<string, ulong, ulong>> _releasedMoney;
@@ -43,7 +43,7 @@ namespace Banking.Implementations
         private IBankUser _authorizedUser;
 
         private List<ITransaction> _transactions;
-        
+
         /// <summary>
         /// Use <see cref="LoadCurrenciesAsync"/> before call any methods
         /// </summary>
@@ -65,7 +65,7 @@ namespace Banking.Implementations
             _releasedMoney = new List<IMoney<string, ulong, ulong>>();
             _balance = new List<IMoney<dynamic, dynamic, dynamic>>();
 
-            
+
             _accountLocker = new object();
             _serialNumberLocker = new object();
             _moneyLocker = new object();
@@ -75,20 +75,26 @@ namespace Banking.Implementations
         #region LoadingCurrencies
         private async Task<byte[]> GetResponseAsync(Uri uri)
         {
+            if (uri is null)
+            {
+                throw new ArgumentNullException(nameof(uri));
+            }
+
             System.Net.WebClient webClient = new System.Net.WebClient();
             return await webClient.DownloadDataTaskAsync(uri);
         }
 
         private async Task<JsonDocument> GetJsonDocumentAsync(Uri uri)
         {
-            try
+            if (uri is null)
             {
-                return await GetResponseAsync(uri).ContinueWith(t => { return JsonDocument.Parse(t.Result); });
+                throw new ArgumentNullException(nameof(uri));
             }
-            catch
+
+            return await GetResponseAsync(uri).ContinueWith(t =>
             {
-                throw;
-            }
+                return JsonDocument.Parse(t.Result);
+            });
         }
 
         private IBankCurrency ParseCurrency(JsonElement item)
@@ -110,18 +116,19 @@ namespace Banking.Implementations
 
         private async Task<List<IBankCurrency>> GetCurrencies(Uri uri)
         {
-            List<IBankCurrency> list = new List<IBankCurrency>();
+            List<IBankCurrency> currencies = new List<IBankCurrency>();
+
             using (JsonDocument document = await GetJsonDocumentAsync(uri))
             {
                 foreach (var item in document.RootElement.EnumerateArray())
                 {
                     IBankCurrency currency = ParseCurrency(item);
 
-                    list.Add(currency);
+                    currencies.Add(currency);
                 }
             }
 
-            return list;
+            return currencies;
         }
 
         private void AddCurrency(IBankCurrency currency)
@@ -176,12 +183,11 @@ namespace Banking.Implementations
 
             await LoadCurrenciesAsync();
 
-            IBankCurrency filteredCurrency = default;
-
             var currencies = await Currencies.GetAsync();
 
-            filteredCurrency = currencies.FirstOrDefault(w =>
-            w.ShortName == account.Currency.ShortName && w.Date.Date == DateTime.Now.Date);
+            IBankCurrency filteredCurrency = currencies.FirstOrDefault(w =>
+                w.ShortName == account.Currency.ShortName &&
+                w.Date.Date == DateTime.Now.Date);
 
             if (filteredCurrency is null)
             {
@@ -191,18 +197,69 @@ namespace Banking.Implementations
             account = new BankAccount<string, ulong, ulong>(account.SerialNumber, account.User, filteredCurrency, account.Amount);
         }
 
-        private void WriteTransaction(DateTime dateTime, string operation)
+        private void AddTransaction(ITransaction transaction)
         {
-            if (string.IsNullOrWhiteSpace(operation))
+            if (transaction is null)
+            {
+                throw new ArgumentNullException(nameof(transaction));
+            }
+            else
+            {
+                lock (_transactionLocker)
+                {
+                    _transactions.Add(transaction);
+                }
+            }
+        }
+
+        private ITransaction CreateTransaction(string description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
             {
                 throw new ArgumentException("String can't be null or white space");
             }
 
-            ITransaction transaction = new Transaction(dateTime, operation);
+            return new Transaction(DateTime.Now, description);
+        }
 
-            lock (_transactionLocker)
+        private string CreateDateParam(DateTime dateTime)
+        {
+            return $"&date={dateTime.Year}" +
+                    (dateTime.Month < 10 ? "0" + dateTime.Month : dateTime.Month) +
+                    (dateTime.Day < 10 ? "0" + dateTime.Day : dateTime.Day);
+        }
+
+        private async Task<bool> CurrenciesAlreadyLoadedForDate(DateTime dateTime)
+        {
+            var availableCurrencies = await Currencies.GetAsync();
+            if (availableCurrencies.Count > 0)
             {
-                _transactions.Add(transaction);
+                if (availableCurrencies.Exists(e => e.Date.Date == dateTime.Date))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private async Task AddNationalCurrency(List<IBankCurrency> newCurrencies)
+        {
+            ICurrency currency = await GetBaseNationalCurrencyAsync();
+            PositiveDouble rate = new PositiveDouble(1);
+            ICurrencyRate currencyRate = new CurrencyRate(rate);
+
+            var uniqCurrList = newCurrencies
+                .Where(w => w.Currency.Equals(currency) == false)
+                .GroupBy(g => g.Date.Date);
+
+            foreach (var item in uniqCurrList)
+            {
+                IBankCurrency nationalCurrency = new BankCurrency(
+                        currency, NATIONAL_CURRENCY_SHORT, currencyRate,
+                        item.Key);
+
+                AddCurrency(nationalCurrency);
             }
         }
     }

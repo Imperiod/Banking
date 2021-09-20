@@ -49,14 +49,10 @@ namespace Banking.Implementations
         public async Task<IBankCurrency> GetFullNationalCurrencyAsync()
         {
             await LoadCurrenciesAsync();
-            var list = await Currencies.GetAsync();
-            IBankCurrency currency;
-            lock (_currencyLocker)
-            {
-                currency = list.First(f => f.Currency.Name == NATIONAL_CURRENCY_FULL);
-            }
 
-            return currency;
+            var currencies = await Currencies.GetAsync();
+
+            return currencies.First(f => f.Currency.Name == NATIONAL_CURRENCY_FULL);
         }
 
 
@@ -81,48 +77,22 @@ namespace Banking.Implementations
         /// <returns>The task of update of list of currency</returns>
         public async Task LoadCurrenciesAsync(DateTime? dateTime = null)
         {
-            string dateParam;
-            if (dateTime is null)
+            DateTime date = (DateTime)(dateTime is null ? DateTime.Now : dateTime);
+
+            if (await CurrenciesAlreadyLoadedForDate(date))
             {
-                dateTime = DateTime.Now;
+                return;
             }
 
-            dateParam = $"&date={dateTime.Value.Year}" +
-                    (dateTime.Value.Month < 10 ? "0" + dateTime.Value.Month : dateTime.Value.Month) +
-                    (dateTime.Value.Day < 10 ? "0" + dateTime.Value.Day : dateTime.Value.Day);
-
-            var availableCurrencies = await Currencies.GetAsync();
-            if (availableCurrencies.Count > 0)
-            {
-                if (availableCurrencies.Exists(e => e.Date.Date == dateTime.Value.Date))
-                {
-                    return;
-                }
-            }
+            string dateParam = CreateDateParam(date);
 
             Uri uri = new Uri($@"https://bank.gov.ua/NBUStatService/v1/statdirectory/exchangenew?json{dateParam}");
 
             var newCurrencies = await GetCurrencies(uri);
             newCurrencies.ForEach(f => AddCurrency(f));
 
-            ICurrency currency = await GetBaseNationalCurrencyAsync();
-            PositiveDouble rate = new PositiveDouble(1);
-            ICurrencyRate currencyRate = new CurrencyRate(rate);
-
-            var uniqCurrList = newCurrencies
-                .Where(w => w.Currency.Equals(currency) == false)
-                .GroupBy(g => g.Date.Date);
-
-            foreach (var item in uniqCurrList)
-            {
-                IBankCurrency nationalCurrency = new BankCurrency(
-                        currency, NATIONAL_CURRENCY_SHORT, currencyRate,
-                        item.Key);
-
-                AddCurrency(nationalCurrency);
-            }
+            await AddNationalCurrency(newCurrencies);
         }
-
 
         /// <summary>
         /// Exchanging funds between accounts of user, with currency rate to date<br />
@@ -159,7 +129,7 @@ namespace Banking.Implementations
         /// <see cref="BankCurrencies.GetAsync"/><br />
         /// <see cref="RefreshAccountRateAsync"/><br />
         /// <see cref="GetFullNationalCurrencyAsync"/><br></br>
-        /// <see cref="WriteTransaction"/><br />
+        /// <see cref="CreateTransaction"/><br />
         /// </i>
         /// </summary>
         /// <param name="from">The account from which funds will be withdraw</param>
@@ -187,16 +157,6 @@ namespace Banking.Implementations
                 throw new ArgumentOutOfRangeException(nameof(amountFrom), "Value is zero");
             }
 
-            if (_accounts.FirstOrDefault(f => f?.User.Equals(_authorizedUser) == true) is null)
-            {
-                throw new ArgumentException($"User {_authorizedUser} have not any account", nameof(_authorizedUser));
-            }
-
-            if (from.SerialNumber.Equals(to.SerialNumber))
-            {
-                throw new InvalidOperationException("Accounts is equals");
-            }
-
             if (await AccountExistAsync(from) == false)
             {
                 throw new ArgumentException("This account is not exist", nameof(from));
@@ -204,6 +164,16 @@ namespace Banking.Implementations
             if (await AccountExistAsync(to) == false)
             {
                 throw new ArgumentException("This account is not exist", nameof(to));
+            }
+
+            if (_accounts.FirstOrDefault(f => f?.User.Equals(_authorizedUser) == true && f.Equals(from)) is null)
+            {
+                throw new ArgumentException($"User {_authorizedUser} have not 'from' account", nameof(_authorizedUser));
+            }
+
+            if (from.SerialNumber.Equals(to.SerialNumber))
+            {
+                throw new InvalidOperationException("Accounts is equals");
             }
 
             await LoadCurrenciesAsync(now);
@@ -222,52 +192,47 @@ namespace Banking.Implementations
                 }
             }
 
-            lock (_accountLocker)
-            {
-                var index = _accounts.IndexOf(_accounts.First(f => f.SerialNumber.Equals(from.SerialNumber)));
-
-                _accounts[index] = new BankAccount<string, ulong, ulong>(
-                    from.SerialNumber,
-                    from.User,
-                    from.Currency,
-                    new PositiveDouble(from.Amount.Value - amountFrom.Value));
-            }
-
             double endMoneyValue = default;
+            await RefreshAccountRateAsync(to);
+            await RefreshAccountRateAsync(from);
 
             if (from.Currency.Equals(await GetFullNationalCurrencyAsync()))
             {
-                await RefreshAccountRateAsync(to);
                 endMoneyValue = amountFrom.Value / to.Currency.CurrencyRate.Rate.Value;
             }
             else
             {
                 if (to.Currency.Equals(await GetFullNationalCurrencyAsync()))
                 {
-                    await RefreshAccountRateAsync(from);
                     endMoneyValue = amountFrom.Value * from.Currency.CurrencyRate.Rate.Value;
                 }
                 else
                 {
-                    await RefreshAccountRateAsync(to);
-                    await RefreshAccountRateAsync(from);
                     endMoneyValue = amountFrom.Value * from.Currency.CurrencyRate.Rate.Value / to.Currency.CurrencyRate.Rate.Value;
                 }
             }
 
             lock (_accountLocker)
             {
-                var index = _accounts.IndexOf(_accounts.First(f => f.SerialNumber.Equals(to.SerialNumber)));
-                _accounts[index] = new BankAccount<string, ulong, ulong>(
+                int fromIndexAccount = _accounts.IndexOf(_accounts.First(f => f.SerialNumber.Equals(from.SerialNumber)));
+
+                _accounts[fromIndexAccount] = new BankAccount<string, ulong, ulong>(
+                    from.SerialNumber,
+                    from.User,
+                    from.Currency,
+                    new PositiveDouble(from.Amount.Value - amountFrom.Value));
+
+                int toIndexAccount = _accounts.IndexOf(_accounts.First(f => f.SerialNumber.Equals(to.SerialNumber)));
+                _accounts[toIndexAccount] = new BankAccount<string, ulong, ulong>(
                     to.SerialNumber,
                     to.User,
                     to.Currency,
                     new PositiveDouble(Math.Round(to.Amount.Value + endMoneyValue, 2)));
             }
 
-            WriteTransaction(DateTime.Now,
-                $"{_authorizedUser} converted {amountFrom} {from.Currency.ShortName} from {from.SerialNumber} " +
+            var transaction = CreateTransaction($"{_authorizedUser} converted {amountFrom} {from.Currency.ShortName} from {from.SerialNumber} " +
                 $"in {Math.Round(endMoneyValue, 2)} {to.Currency.ShortName} to {to.SerialNumber}");
+            AddTransaction(transaction);
         }
 
 
@@ -300,7 +265,7 @@ namespace Banking.Implementations
         /// <see cref="GetBanknotesForCurrencyAsync"/><br />
         /// <see cref="GetFullNationalCurrencyAsync"/><br></br>
         /// <see cref="GetNewSeriesNumber"/><br />
-        /// <see cref="WriteTransaction"/><br />
+        /// <see cref="CreateTransaction"/><br />
         /// </i>
         /// </summary>
         /// <param name="from">Money that will exchange</param>
@@ -381,9 +346,9 @@ namespace Banking.Implementations
                 }
             }
 
-            WriteTransaction(DateTime.Now,
-                $"{from.Nominal.Value} {from.Currency.Name} was exchange" +
+            var transaction = CreateTransaction($"{from.Nominal.Value} {from.Currency.Name} was exchange" +
                 $" in {to.Name} {Math.Round(money.Sum(s => s.Nominal.Value), 2)}");
+            AddTransaction(transaction);
 
             return money;
         }
@@ -577,7 +542,7 @@ namespace Banking.Implementations
         /// <i>
         /// <see cref="AccountExistAsync"/><br />
         /// <see cref="PutAsync"/><br />
-        /// <see cref="WriteTransaction"/><br />
+        /// <see cref="CreateTransaction"/><br />
         /// </i>
         /// </summary>
         /// <typeparam name="TBankCodeTo">Type of bank code for to argument</typeparam>
@@ -631,6 +596,14 @@ namespace Banking.Implementations
                 throw new ArgumentException("Accounts is equals");
             }
 
+            lock (_accountLocker)
+            {
+                if (_accounts.FirstOrDefault(f => f.User.Equals(from.User) && f.Equals(from)) is null)
+                {
+                    throw new ArgumentException($"User {from.User} have not 'from' account", nameof(from.User));
+                }
+            }
+
             await bank.PutAsync<string, ulong, ulong>(to, this, from, amount);
 
             lock (_accountLocker)
@@ -643,9 +616,9 @@ namespace Banking.Implementations
                     new PositiveDouble(from.Amount.Value - amount.Value));
             }
 
-            WriteTransaction(DateTime.Now,
-                $"{_authorizedUser} send {amount} {from.Currency.ShortName}" +
+            var transaction = CreateTransaction($"{_authorizedUser} send {amount} {from.Currency.ShortName}" +
                 $" from {from.SerialNumber} to account of {to} of {bank.GetType().Name}");
+            AddTransaction(transaction);
         }
 
         /// <summary>
@@ -672,7 +645,7 @@ namespace Banking.Implementations
         /// <b>Uses methods:</b><br />
         /// <i>
         /// <see cref="AccountExistAsync"/><br></br>
-        /// <see cref="WriteTransaction"/><br />
+        /// <see cref="CreateTransaction"/><br />
         /// </i>
         /// </summary>
         /// <typeparam name="TBankCodeMoney">Type of bank code money</typeparam>
@@ -734,7 +707,8 @@ namespace Banking.Implementations
                 _balance.AddRange(castMoney);
             }
 
-            WriteTransaction(DateTime.Now, $"Someone put {sum} {account.Currency.ShortName} to {account}");
+            var transaction = CreateTransaction($"Someone put {sum} {account.Currency.ShortName} to {account}");
+            AddTransaction(transaction);
         }
 
         /// <summary>
@@ -763,7 +737,7 @@ namespace Banking.Implementations
         /// <b>Uses methods:</b><br />
         /// <i>
         /// <see cref="AccountExistAsync"/><br></br>
-        /// <see cref="WriteTransaction"/><br />
+        /// <see cref="CreateTransaction"/><br />
         /// </i>
         /// </summary>
         /// <typeparam name="TBankCodeFrom">Type of bank code from</typeparam>
@@ -821,10 +795,9 @@ namespace Banking.Implementations
                 new PositiveDouble(to.Amount.Value + amount.Value));
             }
 
-            WriteTransaction(
-                DateTime.Now,
-                $"{_authorizedUser} got {amount} {to.Currency.ShortName} to {to.SerialNumber} " +
+            var transaction = CreateTransaction($"{_authorizedUser} got {amount} {to.Currency.ShortName} to {to.SerialNumber} " + 
                 $"from {bank.GetType().Name} from account of {from}");
+            AddTransaction(transaction);
         }
 
         /// <summary>
