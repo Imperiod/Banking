@@ -28,5 +28,48 @@ namespace Banking.Implementations
         {
             return $"{Date} {Description}";
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+            else
+            {
+                if (obj is ITransaction transaction)
+                {
+                    return Equals(transaction);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public bool Equals(ITransaction transaction)
+        {
+            if (transaction is null)
+            {
+                throw new ArgumentNullException(nameof(transaction));
+            }
+            else
+            {
+                if (GetHashCode().Equals(transaction.GetHashCode()))
+                {
+                    return true;
+                }
+                else
+                {
+                    return Date.Equals(transaction.Date) && Description.Equals(transaction.Description);
+                }
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
