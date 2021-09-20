@@ -457,13 +457,9 @@ namespace Banking.Implementations
 
             var currencies = await Currencies.GetAsync();
 
-            IBankCurrency newCurrency;
-            lock (_currencyLocker)
-            {
-                newCurrency = currencies
-                .FirstOrDefault(f => f.Currency.Equals(currency) &&
-                                     f.Date.Date == now.Date);
-            }
+            IBankCurrency newCurrency = currencies.FirstOrDefault(f => 
+                f.Currency.Equals(currency) &&
+                f.Date.Date == now.Date);
 
             if (newCurrency is null)
             {
@@ -474,7 +470,7 @@ namespace Banking.Implementations
 
             lock (_accountLocker)
             {
-                if (_accounts.Any(a => a.Currency.Equals(currency)))
+                if (_accounts.Any(a => a.Currency.Currency.Equals(currency)))
                 {
                     throw new ArgumentOutOfRangeException(nameof(currency), $"Account with {currency.Name} currency already exist");
                 }
