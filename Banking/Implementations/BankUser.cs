@@ -10,20 +10,26 @@ namespace Banking.Implementations
     public sealed class BankUser : IBankUser
     {
         private string _password;
+
+        private List<IUserPasswordRule<string>> _rules;
+
         public string Password 
         { 
             init
             {
-                if (value.Length < 4)
+                foreach (var rule in _rules)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Password length must be more then 4 chars");
+                    if(rule.True(value) == false)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(value), rule.ErrorMessage());
+                    }
                 }
                 _password = value;
-            } 
+            }
         }
         public string Login { get; init; }
     
-        public BankUser(string login, string password)
+        public BankUser(string login, string password, List<IUserPasswordRule<string>> rules)
         {
             if (string.IsNullOrWhiteSpace(login))
             {
@@ -33,9 +39,14 @@ namespace Banking.Implementations
             {
                 throw new ArgumentException("String was null or white space");
             }
+            if (rules is null)
+            {
+                throw new ArgumentNullException(nameof(rules));
+            }
 
             Login = login;
             Password = password;
+            _rules = rules;
         }
 
         public override string ToString()
@@ -49,7 +60,7 @@ namespace Banking.Implementations
             {
                 throw new ArgumentException("String was null or white space", nameof(password));
             }
-            return _password == password;
+            return _password.Equals(password);
         }
 
         public bool Equals(IBankUser user)
@@ -65,7 +76,7 @@ namespace Banking.Implementations
             }
             else
             {
-                return Login == user.Login && user.EqualsByPassword(_password);
+                return Login.Equals(user.Login) && user.EqualsByPassword(_password);
             }
         }
 
@@ -91,6 +102,18 @@ namespace Banking.Implementations
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        public bool Equals(IUser user)
+        {
+            if (user is null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            else
+            {
+                return Login.Equals(user.Login);
+            }
         }
     }
 }
