@@ -34,7 +34,14 @@ namespace Banking.Implementations
             }
             else
             {
-                return Name == currency.Name;
+                if (GetHashCode().Equals(currency.GetHashCode()))
+                {
+                    return true;
+                }
+                else
+                {
+                    return Name.Equals(currency.Name);
+                }
             }
         }
 
