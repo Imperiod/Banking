@@ -12,6 +12,8 @@ namespace Banking.Interfaces
 
         public string ToString();
 
+        public bool Equals(IUser user);
+
         public bool Equals(object obj);
     }
 }

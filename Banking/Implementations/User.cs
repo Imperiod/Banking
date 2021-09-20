@@ -25,6 +25,18 @@ namespace Banking.Implementations
             return Login;
         }
 
+        public bool Equals(IUser user)
+        {
+            if (user is null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            else
+            {
+                return Login.Equals(user.Login);
+            }
+        }
+
         public override bool Equals(object obj)
         {
             if (obj is null)
@@ -33,7 +45,7 @@ namespace Banking.Implementations
             }
             if (obj is IUser user)
             {
-                return Login == user.Login;
+                return Equals(user);
             }
             else
             {
