@@ -33,7 +33,6 @@ namespace Banking.Implementations
             Nominal = nominal;
         }
 
-
         public override string ToString()
         {
             return $"{Nominal} {Currency} {SerialNumber}";
@@ -46,7 +45,7 @@ namespace Banking.Implementations
                 throw new ArgumentNullException(nameof(money));
             }
 
-            return Nominal == money.Nominal && Currency.Name == money.Currency.Name;
+            return Nominal.Equals(money.Nominal) && Currency.Equals(money.Currency);
         }
 
         public bool EqualsBySerialNumbers(IMoney<TBankCode, TSeriesCode, TSeriesNumber> money)
@@ -57,6 +56,61 @@ namespace Banking.Implementations
             }
 
             return SerialNumber.Equals(money.SerialNumber);
+        }
+
+        public bool EqualsByNominal(IMoney<TBankCode, TSeriesCode, TSeriesNumber> money)
+        {
+            if (money is null)
+            {
+                throw new ArgumentNullException(nameof(money));
+            }
+            else
+            {
+                return Nominal.Equals(money.Nominal);
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+            else
+            {
+                if (obj is IMoney<TBankCode, TSeriesCode, TSeriesNumber> money)
+                {
+                    return Equals(money);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public bool Equals(IMoney<TBankCode, TSeriesCode, TSeriesNumber> money)
+        {
+            if (money is null)
+            {
+                throw new ArgumentNullException(nameof(money));
+            }
+            else
+            {
+                if (GetHashCode().Equals(money.GetHashCode()))
+                {
+                    return true;
+                }
+                else
+                {
+                    return EqualsBySerialNumbers(money) && EqualsByCurrency(money) && EqualsByNominal(money);
+                }
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

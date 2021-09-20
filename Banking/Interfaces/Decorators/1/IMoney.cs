@@ -15,8 +15,14 @@ namespace Banking.Interfaces
 
         public string ToString();
 
+        public bool Equals(IMoney<TBankCode, TSeriesCode, TSeriesNumber> money);
+
+        public bool Equals(object obj);
+
         public bool EqualsByCurrency(IMoney<TBankCode, TSeriesCode, TSeriesNumber> money);
 
         public bool EqualsBySerialNumbers(IMoney<TBankCode, TSeriesCode, TSeriesNumber> money);
+
+        public bool EqualsByNominal(IMoney<TBankCode, TSeriesCode, TSeriesNumber> money);
     }
 }
