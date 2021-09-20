@@ -44,10 +44,20 @@ namespace Banking.Implementations
             {
                 throw new ArgumentNullException(nameof(account));
             }
-            return SerialNumber.Equals(account.SerialNumber) &&
-                    User.Equals(account.User) &&
-                    Currency.Equals(account.Currency) &&
-                    Amount.Equals(account.Amount);
+            else
+            {
+                if (GetHashCode().Equals(account.GetHashCode()))
+                {
+                    return true;
+                }
+                else
+                {
+                    return SerialNumber.Equals(account.SerialNumber) &&
+                        User.Equals(account.User) &&
+                        Currency.Equals(account.Currency) &&
+                        Amount.Equals(account.Amount);
+                }
+            }
         }
 
         public override string ToString()
