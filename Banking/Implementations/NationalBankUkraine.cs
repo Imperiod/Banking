@@ -73,15 +73,21 @@ namespace Banking.Implementations
         }
 
         #region LoadingCurrencies
-        private async Task<byte[]> GetResponseAsync(Uri uri)
+        private async Task<List<IBankCurrency>> GetCurrencies(Uri uri)
         {
-            if (uri is null)
+            List<IBankCurrency> currencies = new List<IBankCurrency>();
+
+            using (JsonDocument document = await GetJsonDocumentAsync(uri))
             {
-                throw new ArgumentNullException(nameof(uri));
+                foreach (var item in document.RootElement.EnumerateArray())
+                {
+                    IBankCurrency currency = ParseCurrency(item);
+
+                    currencies.Add(currency);
+                }
             }
 
-            System.Net.WebClient webClient = new System.Net.WebClient();
-            return await webClient.DownloadDataTaskAsync(uri);
+            return currencies;
         }
 
         private async Task<JsonDocument> GetJsonDocumentAsync(Uri uri)
@@ -95,6 +101,17 @@ namespace Banking.Implementations
             {
                 return JsonDocument.Parse(t.Result);
             });
+        }
+
+        private async Task<byte[]> GetResponseAsync(Uri uri)
+        {
+            if (uri is null)
+            {
+                throw new ArgumentNullException(nameof(uri));
+            }
+
+            System.Net.WebClient webClient = new System.Net.WebClient();
+            return await webClient.DownloadDataTaskAsync(uri);
         }
 
         private IBankCurrency ParseCurrency(JsonElement item)
@@ -112,23 +129,6 @@ namespace Banking.Implementations
             ICurrency currency = new Currency(name);
 
             return new BankCurrency(currency, shortName, currencyRate, exchangeDate);
-        }
-
-        private async Task<List<IBankCurrency>> GetCurrencies(Uri uri)
-        {
-            List<IBankCurrency> currencies = new List<IBankCurrency>();
-
-            using (JsonDocument document = await GetJsonDocumentAsync(uri))
-            {
-                foreach (var item in document.RootElement.EnumerateArray())
-                {
-                    IBankCurrency currency = ParseCurrency(item);
-
-                    currencies.Add(currency);
-                }
-            }
-
-            return currencies;
         }
 
         private void AddCurrency(IBankCurrency currency)

@@ -395,7 +395,7 @@ namespace Banking.Implementations
         /// <b>Required conditions for success:</b><br></br>
         /// <i>
         /// Login must be correct, without white space<br></br>
-        /// Password min length 4 chars without white space<br />
+        /// Password min length 5 chars without white space<br />
         /// </i>
         /// <br />
         /// <b>Uses methods:</b><br />
